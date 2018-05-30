@@ -396,6 +396,8 @@ c_mmp = for_optimize1 - for_optimize2
 # Достаем градиент Гамма-функции и ищем ее минимум, числа 19 и 12, найдены чисто эмпирически
 # 19 дает отрицательное значение функции, 12 положительное
 gamma_gradient = help.gammaGradient(c_mmp).gamma_gradient
+print(gamma_gradient(19))
+print(gamma_gradient(12))
 k_for_gamma_mmp = help.fmin_bisection(gamma_gradient, 19, 12, 1e-14)
 theta_for_gamma_mmp = for_optimize3 / (k_for_gamma_mmp * numOfPoints)
 print("\tДля Гамма-распределения")

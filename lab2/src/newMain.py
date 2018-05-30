@@ -80,6 +80,8 @@ print('Area under the histogram : ', str(ssss_____))
 # Конец проверки площади
 
 plot.bar(steps, for_relative, width=h)
+plot.xlim([0.6, 13])
+plot.ylim([0, 0.3])
 plot.title("Относительная гистограмма")
 # plot.savefig("../newOut/relativeHistogram.png", dpi=200)
 # plot.show()
@@ -239,8 +241,8 @@ for i in range(1, 11):
     plot.plot(mean_interval[i][0], 0, 'b<')
     plot.plot(mean_interval[i][1], 0, 'b>')
 axes[0].set_xlim([4.4, 4.6])
-# plot.savefig("../newOut/intervalsMoments.png", dpi=200)
-# plot.show()
+plot.savefig("../newOut/intervalsMoments.png", dpi=200)
+plot.show()
 plot.close()
 
 # Для дисперсии
@@ -264,7 +266,7 @@ for i in range(1, 11):
     plot.plot(dispersion_interval[i][0], 0, 'b<')
     plot.plot(dispersion_interval[i][1], 0, 'b>')
 axes[0].set_xlim([2.18, 2.3])
-# plot.savefig("../newOut/intervalDispersion.png", dpi=200)
+plot.savefig("../newOut/intervalDispersion.png", dpi=200)
 # plot.show()
 plot.close()
 # =================== графики ИНТЕРВАЛЬНЫХ ОЦЕНКИ МАТ ОЖИДАНИЯ М ДИСПЕРСИИ напечатаны! ==========================
@@ -303,8 +305,8 @@ plot.plot(tolerant_interval_average[1], 0, 'b>')
 plot.plot(data[interquantile_interval[0]], 0, 'ro')
 plot.plot(data[interquantile_interval[1]], 0, 'ro')
 plot.legend(("Левый толерантный предел", "Правый толерантный предел", "Интерквантильный промежуток"), loc='upper right')
-# plot.savefig("../out/tolerantLimsAverage.png", dpi=200)
-# plot.show()
+plot.savefig("../newOut/tolerantLimsAverage.png", dpi=200)
+plot.show()
 plot.close()
 
 plot.title("Толерантные пределы относительно нуля")
@@ -312,8 +314,8 @@ plot.yticks([])
 plot.plot(tolerant_interval_zero[0], 0, 'b<')
 plot.plot(tolerant_interval_zero[1], 0, 'b>')
 plot.legend(("Левый толерантный предел", "Правый толерантный предел"), loc='upper right')
-# plot.savefig("../out/tolerantLimsZero.png", dpi=200)
-# plot.show()
+plot.savefig("../newOut/tolerantLimsZero.png", dpi=200)
+plot.show()
 plot.close()
 
 # Считаем параметрические толерантные пределы подвыборок
@@ -339,18 +341,19 @@ for i in range(10):
     plot.plot(parametric_tolerant_interval[i][0], 0, 'b<')
     plot.plot(parametric_tolerant_interval[i][1], 0, 'b>')
     plot.plot(mean[i + 1], 0, 'ro')
-# plot.savefig("../out/parametricTolerantLims.png", dpi=200)
-# plot.show()
+plot.savefig("../newOut/parametricTolerantLims.png", dpi=200)
+plot.show()
 plot.close()
 
 # ============================= ЧАСТЬ 2 ========================================
 # ========================== МЕТОД МОМЕНТОВ ====================================
 print("===========================МЕТОД МОМЕНТОВ==========================")
-# Нормальное, Гамма и Лапласа
+# Релея, Гамма и Лапласа
 
-# Для нормального распредления
-print("\tДля нормального распредления")
-print("\t\tc = " + str(mean[0]) + " s = " + str(root_of_dispersion[0]))
+# Для распредления Релея
+sigma_for_rayleigh_moment_method = mean[0]/math.sqrt(math.pi/2)
+print("\tДля распределения Релея")
+print("\t\tsigma = " + str(sigma_for_rayleigh_moment_method))
 
 a_for_laplace_moment_method = median[0]
 laplace_lambda_moment_method = math.sqrt(2 / dispersion[0])
@@ -365,12 +368,11 @@ print("\t\tk = " + str(k_for_gamma_moment_method) + " lambda = " + str(theta_for
 # ======================================= ММП ====================================================
 print("===========================ММП==========================")
 
-# Для нормального распределения
-c_for_normal_mmp = 1 / numOfPoints * sum(data)
-dispersion_for_normal_mmp = 1 / numOfPoints * sum((np.array(data) - c_for_normal_mmp) ** 2)
-s_for_normal_mmp = math.sqrt(dispersion_for_normal_mmp)
-print("\tДля нормального распределения")
-print("\t\tc = " + str(c_for_normal_mmp) + " s = " + str(s_for_normal_mmp))
+# Для распределения Релея
+dispersion_for_rayleigh_mmp = 1 / (2 * numOfPoints) * sum(np.array(data) ** 2)
+s_for_rayleigh_mmp = math.sqrt(dispersion_for_rayleigh_mmp)
+print("\tДля распределения Релея")
+print("\t\tsigma = " + str(s_for_rayleigh_mmp))
 
 # Для распределения Лапласа
 a_for_laplace_mmp = mean[0]
@@ -391,10 +393,300 @@ for_optimize1 = np.log(for_optimize1 / numOfPoints)
 for_optimize2 = for_optimize2 / numOfPoints
 c_mmp = for_optimize1 - for_optimize2
 
-# Достаем градиент Гамма-функции и ищем ее минимум, числа 19 и 12, найдены чисто эмпирически
-# 19 дает отрицательное значение функции, 12 положительное
+# Достаем градиент Гамма-функции и ищем ее минимум, числа 10 и 8, найдены чисто эмпирически
+# 10 дает отрицательное значение функции, 8 положительное
 gamma_gradient = help.gammaGradient(c_mmp).gamma_gradient
-k_for_gamma_mmp = help.fmin_bisection(gamma_gradient, 19, 12, 1e-14)
+k_for_gamma_mmp = help.fmin_bisection(gamma_gradient, 10, 8, 1e-14)
 theta_for_gamma_mmp = for_optimize3 / (k_for_gamma_mmp * numOfPoints)
 print("\tДля Гамма-распределения")
 print("\t\tk = " + str(k_for_gamma_mmp) + " theta = " + str(theta_for_gamma_mmp))
+
+# ======================= Построим финции распределения и плотности вместе с гистограммой
+
+# Для нормального распределения
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html#scipy.stats.norm
+plot.title("Сравнение с плотностью распределения Рэлея")
+plot.bar(steps, for_relative, width=h)
+plot.xlim([0.6, 13])
+plot.ylim([0, 0.3])
+plot.plot(data, stats.rayleigh.pdf(np.array(data), scale=sigma_for_rayleigh_moment_method), 'b')
+plot.plot(data, stats.rayleigh.pdf(np.array(data), scale=s_for_rayleigh_mmp), 'r')
+plot.legend(("Метод моментов", "ММП", "Гистограмма"), loc='upper right')
+# plot.savefig("../newOut/withRayleigh.png", dpi=200)
+# plot.show()
+plot.close()
+
+plot.title("Сравнение с распределением Рэлея")
+plot.bar(steps, distribution_fun / numOfPoints, width=h)
+plot.plot(data, stats.rayleigh.cdf(np.array(data), scale=sigma_for_rayleigh_moment_method), 'b')
+plot.plot(data, stats.rayleigh.cdf(np.array(data), scale=s_for_rayleigh_mmp), 'r')
+plot.legend(("Метод моментов", "ММП", "Эмпирическая"), loc='upper right')
+# plot.savefig("../newOut/withRayleighCumulative.png", dpi=200)
+# plot.show()
+plot.close()
+
+# Для распределения Лапласа
+
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.laplace.html
+plot.title("Сравнение с плотностью распределения Лапласа")
+plot.bar(steps, for_relative, width=h)
+plot.xlim([0.6, 13])
+plot.ylim([0, 0.6])
+plot.plot(data,
+          stats.laplace.pdf(np.array(data), loc=a_for_laplace_moment_method, scale=1 / laplace_lambda_moment_method),
+          'b')
+plot.plot(data, stats.laplace.pdf(np.array(data), loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp), 'r')
+plot.legend(("Метод моментов", "ММП", "Гистограмма"), loc='upper right')
+# plot.savefig("../newOut/withLaplace.png", dpi=200)
+# plot.show()
+plot.close()
+
+plot.title("Сравнение с распределением Лапласа")
+plot.bar(steps, distribution_fun / numOfPoints, width=h)
+plot.plot(data, stats.laplace.cdf(np.array(data), loc=mean[0], scale=1 / laplace_lambda_moment_method), 'b')
+plot.plot(data, stats.laplace.cdf(np.array(data), loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp), 'r')
+plot.legend(("Метод моментов", "ММП", "Эмпирическая"), loc='upper right')
+# plot.savefig("../newOut/withLaplaceCumulative.png", dpi=200)
+# plot.show()
+plot.close()
+
+# Для Гамма-распределения
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gamma.html
+plot.title("Сравнение с плотностью Гамма-распределения")
+plot.bar(steps, for_relative, width=h)
+plot.xlim([0.6, 13])
+plot.ylim([0, 0.3])
+plot.plot(data, stats.gamma.pdf(np.array(data), k_for_gamma_moment_method, scale=theta_for_gamma_moment_method), 'b')
+plot.plot(data, stats.gamma.pdf(np.array(data), k_for_gamma_mmp, scale=theta_for_gamma_mmp), 'r')
+plot.legend(("Метод моментов", "ММП", "Гистограмма"), loc='upper right')
+# plot.savefig("../newOut/withGamma.png", dpi=200)
+# plot.show()
+plot.close()
+
+plot.title("Сравнение с Гамма-распределением")
+plot.bar(steps, distribution_fun / numOfPoints, width=h)
+plot.plot(data, stats.gamma.cdf(np.array(data), k_for_gamma_moment_method, scale=theta_for_gamma_moment_method), 'b')
+plot.plot(data, stats.gamma.cdf(np.array(data), k_for_gamma_mmp, scale=theta_for_gamma_mmp), 'r')
+plot.legend(("Метод моментов", "ММП", "Эмпирическая"), loc='upper right')
+# plot.savefig("../newOut/withGammaCumulative.png", dpi=200)
+# plot.show()
+plot.close()
+
+# ========================== ПРОВЕРКА ГИПОТЕЗ ============================================
+print("========================== ПРОВЕРКА ГИПОТЕЗ ==============================")
+# _nk  - кол-во точек, попавших в k-ый интервал
+_nk = np.empty(m)
+index = 0
+for val in distribution_fun:
+    if index == 0:
+        _nk[index] = val
+    else:
+        _nk[index] = val - distribution_fun[index - 1]
+    index += 1
+
+# =============== Хи-квадрат==============================================================
+print("=============== Хи-квадрат статистика=====================")
+print("\tКритическое значение для Рэлея = 50.6598")
+print("\tКритическое значение для Лапласа и Гаммы = 49.5126")  # Значение получено в MATLAB
+print("\tДля распределения Рэлея")
+index = 0
+chi2_stat = 0
+for i in range(40):
+    if i == 0:
+        ___Pk = stats.rayleigh.cdf(steps[index], scale=sigma_for_rayleigh_moment_method) - \
+                stats.rayleigh.cdf(min_value, scale=sigma_for_rayleigh_moment_method)
+    else:
+        ___Pk = stats.rayleigh.cdf(steps[index], scale=sigma_for_rayleigh_moment_method) - \
+                stats.rayleigh.cdf(steps[index - 1], scale=sigma_for_rayleigh_moment_method)
+    chi2_stat += (numOfPoints * ___Pk - _nk[index]) ** 2 / (numOfPoints * ___Pk)
+    index += 1
+print("\t\tДля метода моментов = " + str(chi2_stat))
+
+index = 0
+chi2_stat = 0
+for i in range(40):
+    if i == 0:
+        ___Pk = stats.rayleigh.cdf(steps[index],  scale=s_for_rayleigh_mmp) - \
+                stats.rayleigh.cdf(min_value, scale=s_for_rayleigh_mmp)
+    else:
+        ___Pk = stats.rayleigh.cdf(steps[index], scale=s_for_rayleigh_mmp) - \
+                stats.rayleigh.cdf(steps[index - 1], scale=s_for_rayleigh_mmp)
+    chi2_stat += (numOfPoints * ___Pk - _nk[index]) ** 2 / (numOfPoints * ___Pk)
+    index += 1
+print("\t\tДля ММП = " + str(chi2_stat))
+
+print("\tДля распределения Лапласа")
+index = 0
+chi2_stat = 0
+for i in range(40):
+    if i == 0:
+        ___Pk = stats.laplace.cdf(steps[index], loc=a_for_laplace_moment_method,
+                                  scale=1 / laplace_lambda_moment_method) - \
+                stats.laplace.cdf(min_value, loc=a_for_laplace_moment_method, scale=1 / laplace_lambda_moment_method)
+    else:
+        ___Pk = stats.laplace.cdf(steps[index], loc=a_for_laplace_moment_method,
+                                  scale=1 / laplace_lambda_moment_method) - \
+                stats.laplace.cdf(steps[index - 1], loc=a_for_laplace_moment_method,
+                                  scale=1 / laplace_lambda_moment_method)
+    chi2_stat += (numOfPoints * ___Pk - _nk[index]) ** 2 / (numOfPoints * ___Pk)
+    index += 1
+print("\t\tДля метода моментов = " + str(chi2_stat))
+
+index = 0
+chi2_stat = 0
+for i in range(40):
+    if i == 0:
+        ___Pk = stats.laplace.cdf(steps[index], loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp) - \
+                stats.laplace.cdf(min_value, loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp)
+    else:
+        ___Pk = stats.laplace.cdf(steps[index], loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp) - \
+                stats.laplace.cdf(steps[index - 1], loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp)
+    chi2_stat += (numOfPoints * ___Pk - _nk[index]) ** 2 / (numOfPoints * ___Pk)
+    index += 1
+print("\t\tДля ММП = " + str(chi2_stat))
+
+print("\tДля Гамма-распределения")
+index = 0
+chi2_stat = 0
+for i in range(40):
+    if i == 0:
+        ___Pk = stats.gamma.cdf(steps[index], k_for_gamma_moment_method, scale=theta_for_gamma_moment_method) - \
+                stats.gamma.cdf(min_value, k_for_gamma_moment_method, scale=theta_for_gamma_moment_method)
+    else:
+        ___Pk = stats.gamma.cdf(steps[index], k_for_gamma_moment_method, scale=theta_for_gamma_moment_method) - \
+            stats.gamma.cdf(steps[index - 1], k_for_gamma_moment_method, scale=theta_for_gamma_moment_method)
+    chi2_stat += (numOfPoints * ___Pk - _nk[index]) ** 2 / (numOfPoints * ___Pk)
+    index += 1
+print("\t\tДля метода моментов = " + str(chi2_stat))
+
+index = 0
+chi2_stat = 0
+for i in range(40):
+    if i == 0:
+        ___Pk = stats.gamma.cdf(steps[index], k_for_gamma_moment_method, scale=theta_for_gamma_moment_method) - \
+                stats.gamma.cdf(min_value, k_for_gamma_moment_method, scale=theta_for_gamma_moment_method)
+    else:
+        ___Pk = stats.gamma.cdf(steps[index], k_for_gamma_mmp, scale=theta_for_gamma_mmp) - \
+            stats.gamma.cdf(steps[index - 1], k_for_gamma_mmp, scale=theta_for_gamma_mmp)
+    chi2_stat += (numOfPoints * ___Pk - _nk[index]) ** 2 / (numOfPoints * ___Pk)
+    index += 1
+print("\t\tДля ММП = " + str(chi2_stat))
+
+# =============== КОЛМАГОРОВА - СМИРНОВА==============================================================
+print("=============== статистика КОЛМАГОРОВА - СМИРНОВА =====================")
+# Посчитаем D критическое для N=12200, alpha=0.1
+___Dcrit = np.sqrt(- (np.log(0.5 * 0.1) / (2 * numOfPoints))) - 1 / (6 * numOfPoints)
+print("\tКритическое значение = " + str(___Dcrit))
+
+print("\tДля распределения Рэлея")
+___D = 0
+index = 1
+for val in data:
+    _____ddd = abs(stats.rayleigh.cdf(val, scale=sigma_for_rayleigh_moment_method) - index / numOfPoints)
+    if _____ddd > ___D: ___D = _____ddd
+    index += 1
+print("\t\tДля метода моментов = " + str(___D))
+
+___D = 0
+index = 1
+for val in data:
+    _____ddd = abs(stats.rayleigh.cdf(val, scale=s_for_rayleigh_mmp) - index / numOfPoints)
+    if _____ddd > ___D: ___D = _____ddd
+    index += 1
+print("\t\tДля ММП = " + str(___D))
+
+print("\tДля распределения Лапласа")
+___D = 0
+index = 1
+for val in data:
+    _____ddd = abs(stats.laplace.cdf(val, loc=a_for_laplace_moment_method,
+                                     scale=1 / laplace_lambda_moment_method) - index / numOfPoints)
+    if _____ddd > ___D: ___D = _____ddd
+    index += 1
+print("\t\tДля метода моментов = " + str(___D))
+
+___D = 0
+index = 1
+for val in data:
+    _____ddd = abs(stats.laplace.cdf(val, loc=a_for_laplace_mmp, scale=1 / laplace_lambda_mmp) - index / numOfPoints)
+    if _____ddd > ___D: ___D = _____ddd
+    index += 1
+print("\t\tДля ММП = " + str(___D))
+
+print("\tДля Гамма-распределения")
+___D = 0
+index = 1
+for val in data:
+    _____ddd = abs(stats.gamma.cdf(val, k_for_gamma_moment_method,
+                                   scale=theta_for_gamma_moment_method) - index / numOfPoints)
+    if _____ddd > ___D: ___D = _____ddd
+    index += 1
+print("\t\tДля метода моментов = " + str(___D))
+
+___D = 0
+index = 1
+for val in data:
+    _____ddd = abs(stats.gamma.cdf(val, k_for_gamma_mmp, scale=theta_for_gamma_mmp) - index / numOfPoints)
+    if _____ddd > ___D: ___D = _____ddd
+    index += 1
+print("\t\tДля ММП = " + str(___D))
+
+# ======================= критерий Мизеса ================================
+print("=============== статистика Мизеса =====================")
+print("\tКритическое значение = 0.347")  # Значение взято из таблицы
+
+print("\tДля распределения Рэлея")
+___w = 0
+index = 1
+for val in data:
+    ___w += (stats.rayleigh.cdf(val, scale=sigma_for_rayleigh_moment_method) - (2 * index - 1) / (2 * numOfPoints)) ** 2
+    index += 1
+___w = 1 / (12 * numOfPoints) + ___w
+print("\t\tДля метода моментов = " + str(___w))
+
+___w = 0
+index = 1
+for val in data:
+    ___w += (stats.norm.cdf(val, scale=s_for_rayleigh_mmp) - (2 * index - 1) / (
+            2 * numOfPoints)) ** 2
+    index += 1
+___w = 1 / (12 * numOfPoints) + ___w
+print("\t\tДля ММП = " + str(___w))
+
+print("\tДля распределения Лапласа")
+___w = 0
+index = 1
+for val in data:
+    ___w += (stats.laplace.cdf(val, loc=a_for_laplace_moment_method,
+                               scale=1 / laplace_lambda_moment_method) - (2 * index - 1) / (2 * numOfPoints)) ** 2
+    index += 1
+___w = 1 / (12 * numOfPoints) + ___w
+print("\t\tДля метода моментов = " + str(___w))
+
+___w = 0
+index = 1
+for val in data:
+    ___w += (stats.laplace.cdf(val, loc=a_for_laplace_mmp,
+                               scale=1 / laplace_lambda_mmp) - (2 * index - 1) / (2 * numOfPoints)) ** 2
+    index += 1
+___w = 1 / (12 * numOfPoints) + ___w
+print("\t\tДля ММП = " + str(___w))
+
+print("\tДля Гамма-распределения")
+___w = 0
+index = 1
+for val in data:
+    ___w += (stats.gamma.cdf(val, k_for_gamma_moment_method,
+                             scale=theta_for_gamma_moment_method) - (2 * index - 1) / (2 * numOfPoints)) ** 2
+    index += 1
+___w = 1 / (12 * numOfPoints) + ___w
+print("\t\tДля метода моментов = " + str(___w))
+
+___w = 0
+index = 1
+for val in data:
+    ___w += (stats.gamma.cdf(val, k_for_gamma_mmp, scale=theta_for_gamma_mmp) - (2 * index - 1) / (
+            2 * numOfPoints)) ** 2
+    index += 1
+___w = 1 / (12 * numOfPoints) + ___w
+print("\t\tДля ММП = " + str(___w))
