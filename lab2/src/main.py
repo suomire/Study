@@ -5,6 +5,7 @@ import scipy.stats as stats
 import numpy as np
 from lab2.src import help
 
+# I aM a VeRy COolL
 # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
 
 # =================================== Подготовка данных ===============================
